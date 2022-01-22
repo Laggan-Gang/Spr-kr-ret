@@ -72,8 +72,8 @@ client.on("messageCreate", async (meddelande) => {
 
   if (!meddelande.author.bot) {
     if (dravel.slice(1, 4) in gifSamling) {
-      console.log("Vi hittade grejen därine");
       gif(meddelande, dravel, channel);
+      meddelande.delete();
     } else if (dravel === "oh my, what are the codes for these gifs?") {
       let gifManuel = new String();
       for (gifBeskrivning in gifSamling) {
@@ -89,7 +89,6 @@ client.on("messageCreate", async (meddelande) => {
 
       meddelande.reply(gifManuel);
     }
-    console.log("vi hittade inte den här grejen");
   }
 });
 
