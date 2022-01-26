@@ -190,13 +190,14 @@ client.on("messageCreate", async (meddelande) => {
       var emojiSiffror = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
       let fillBoys = [];
       let aktivaNoobs = dummyArray;
+      var äggKlockan;
 
       function vadKallasDu() {
         let noobenIFråga = "";
         if (aktivaNoobs[i].id) {
           noobenIFråga = `<@${aktivaNoobs[i].id}>`;
         } else {
-          noobenIFråga = aktivaNoobs[i].namn;
+          noobenIFråga = kapitalisera(aktivaNoobs[i].namn);
         }
         return noobenIFråga;
       }
@@ -214,7 +215,6 @@ client.on("messageCreate", async (meddelande) => {
       function hittaOchKollaPreferens(noobs) {
         let preferenser = noobs[i].preferences;
         let resultat = "5️⃣";
-        console.log(preferenser);
         for (const preferens of preferenser) {
           if (rollKoll(emojiSiffror[preferens - 1]) == "vanlig") {
             //Vi använder roll-koll för att hitta vad som räknas som en "vanlig" pick och sen tjongar vi iväg den. Det är funky när vi översätter preferens till emojiSiffror eftersom
@@ -226,6 +226,20 @@ client.on("messageCreate", async (meddelande) => {
         return resultat;
       }
 
+      async function autoPicker(reaktion, noobs) {
+        console.log("Nu kör vi automatiska versionen! Först uppdatera pick");
+        await standardPick(reaktion, noobs);
+        console.log("Sen hämta nästa noob!");
+        await finskaFighten(noobs);
+      }
+
+      function snooze(timer) {
+        if (timer) {
+          clearTimeout(timer);
+          timer = 0;
+        }
+      }
+
       async function searchAndDestroy(noobs, row) {
         //destroy the last message
         try {
@@ -235,11 +249,15 @@ client.on("messageCreate", async (meddelande) => {
         }
         //seach for new guy
         try {
+          let föredragen = hittaOchKollaPreferens(noobs);
           pingMeddelande = await tråden.send(
-            `${vadKallasDu()}, your turn to pick. Please react above with your role of choice ${row}. If you do not pick you will be assigned ${hittaOchKollaPreferens(
-              noobs
-            )}`
+            `${vadKallasDu()}, your turn to pick. If you do not pick within 60 seconds you will be assigned ${föredragen}, ${row}`
           );
+          //Vi sätter en äggklocka, men ser först till att vi avslutar den tidigare (om det finns någon)
+          snooze(äggKlockan);
+          äggKlockan = setTimeout(async function () {
+            await autoPicker(föredragen, aktivaNoobs);
+          }, 60_000);
         } catch (error) {
           console.error("Failed to send the message: ", error);
         }
@@ -259,10 +277,21 @@ client.on("messageCreate", async (meddelande) => {
       }
 
       async function standardPick(reaktion, noobs) {
-        if (rollKoll(reaktion.emoji.name) == "vanlig") {
-          pickladeRoller.push(reaktion.emoji.name);
+        let riktigReact;
+        console.log("Kolla om vår reaktion har ett namn ");
+        if (reaktion.emoji) {
+          console.log("'Den har ett namn!");
+          riktigReact = reaktion.emoji.name;
+        } else {
+          console.log("Den har inte ett namn!");
+          riktigReact = reaktion;
         }
-        modMeddelande += `${noobs[i].namn} has picked ${reaktion.emoji.name}!\n`;
+        if (rollKoll(riktigReact) == "vanlig") {
+          pickladeRoller.push(riktigReact);
+        }
+        modMeddelande += `${kapitalisera(
+          noobs[i].namn
+        )} has picked ${riktigReact}!\n`;
         try {
           await trådMeddelande.edit(modMeddelande);
         } catch (error) {
@@ -280,7 +309,9 @@ client.on("messageCreate", async (meddelande) => {
       }
       async function dublettTillrättavisaren(noobs, reaction, row) {
         let trängningsMeddelande = await tråden.send(
-          `${noobs[i].namn} ${reaction.emoji.name} has already been picked, please pick another role!`,
+          `${kapitalisera(noobs[i].namn)} ${
+            reaction.emoji.name
+          } has already been picked, please pick another role!`,
           row
         );
         setTimeout(() => {
@@ -288,17 +319,68 @@ client.on("messageCreate", async (meddelande) => {
         }, 5_000);
       }
 
+      function kapitalisera(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+      }
+
       async function skojareTillrättavisaren(noobs, row) {
-        let skojareMeddelande = await tråden.send(
-          `${noobs[i].namn} Du kan inte välja fill när du är last pick >:(`,
-          row
-        );
-        setTimeout(() => {
-          skojareMeddelande.delete();
-        }, 5_000);
+        try {
+          let skojareMeddelande = await tråden.send(
+            `${kapitalisera(
+              noobs[i].namn
+            )} du kan inte välja fill när du är last pick >:(`,
+            row
+          );
+          setTimeout(() => {
+            skojareMeddelande.delete();
+          }, 5_000);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      async function finskaFighten(noobs) {
+        snooze(äggKlockan);
+        if (!modFull()) {
+          console.log(
+            "Alla noobs har inte valt roll eller fill, vi behöver fler"
+          );
+          await searchAndDestroy(noobs, 340);
+        } else {
+          console.log(
+            "Alla har pickat roll eller fill, nu ska vi kolla om vi behöver byta array"
+          );
+          if (fillBoys.length > 0) {
+            console.log(
+              "Vi har boys i fill boys, vi switchar aktiv array, återställer i och kallar på nästa boy"
+            );
+            if (pickladeRoller.length === 5) {
+              console.log("Vi har alla roller pickade, avslutar...");
+              snooze(äggKlockan);
+              collector.stop();
+            } else {
+              if (aktivaNoobs == dummyArray) {
+                console.log(
+                  "Aktiva noobs har inte blivit fillBoys ännu, så vi resettar i"
+                );
+                i = 0;
+              }
+              aktivaNoobs = fillBoys;
+              console.log(fillBoys[i]);
+              await searchAndDestroy(aktivaNoobs, 361);
+            }
+          } else {
+            console.log(
+              "Fillboys är tom, vi behöver inte byta och avslutar..."
+            );
+            snooze(äggKlockan);
+            collector.stop();
+          }
+        }
       }
 
       collector.on("collect", async (reaction, user) => {
+        snooze(äggKlockan);
         console.log(
           "Vi har fått en react och ska nu utvärdera om den är vanlig, dublett eller fill"
         );
@@ -310,38 +392,8 @@ client.on("messageCreate", async (meddelande) => {
 
           //om det är en standard pick
           await standardPick(reaction, aktivaNoobs);
-          //Kalla nya noobs, men bara om vi behöver fler noobs (dvs om modFull inte är full)
-          if (!modFull()) {
-            console.log(
-              "Alla noobs har inte valt roll eller fill, vi behöver fler"
-            );
-            await searchAndDestroy(aktivaNoobs, 373);
-          } else {
-            console.log(
-              "Alla har pickat roll eller fill, nu ska vi kolla om vi behöver byta array"
-            );
-            if (fillBoys.length > 0) {
-              console.log(
-                "Vi har boys i fill boys, vi switchar aktiv array, återställer i och kallar på nästa boy"
-              );
-              if (pickladeRoller.length === 5) {
-                console.log("Vi har alla roller pickade, avslutar...");
-                collector.stop();
-              } else {
-                if (aktivaNoobs == dummyArray) {
-                  console.log(
-                    "Aktiva noobs har inte blivit fillBoys ännu, så vi resettar i"
-                  );
-                  i = 0;
-                }
-                aktivaNoobs = fillBoys;
-                console.log(fillBoys[i]);
-                await searchAndDestroy(aktivaNoobs);
-              }
-            } else {
-              collector.stop();
-            }
-          }
+          //Avsluta det hela genom att kalla nya noobs, men bara om vi behöver fler noobs (dvs om modFull inte är full)
+          await finskaFighten(aktivaNoobs);
         } else if (rollKoll(reaction.emoji.name) == "ogiltig") {
           //Ogiltig roll (mobba!)
           console.log("Någon har gjort funny business, så vi mobbar");
@@ -358,15 +410,42 @@ client.on("messageCreate", async (meddelande) => {
             console.log("Någon har valt fill, så vi sätter hen i fillboys");
             fillBoys.unshift(dummyArray[i]);
             await standardPick(reaction, aktivaNoobs);
-            await searchAndDestroy(aktivaNoobs, 390);
+            await searchAndDestroy(aktivaNoobs, 403);
           }
         }
       });
 
       collector.on("end", (collected) => {
-        pingMeddelande.delete();
-        pingMeddelande = tråden.send(`Alla har pickat! GL HF :).`);
-        console.log(`Collected`, collected);
+        snooze(äggKlockan);
+        let modRader = modMeddelande.split("\n");
+        let finsktMeddelande = "";
+        for (rad of modRader) {
+          if (
+            rad.includes(emojiSiffror[0]) ||
+            rad.includes(emojiSiffror[1]) ||
+            rad.includes(emojiSiffror[2]) ||
+            rad.includes(emojiSiffror[3]) ||
+            rad.includes(emojiSiffror[4])
+          ) {
+            finsktMeddelande += `${rad}\n`;
+          }
+        }
+        try {
+          trådMeddelande.edit(finsktMeddelande);
+        } catch (error) {
+          console.error(error);
+        }
+        console.log(finsktMeddelande);
+        try {
+          pingMeddelande.delete();
+        } catch (error) {
+          console.error("Failed to delete the message: ", error);
+        }
+        try {
+          pingMeddelande = tråden.send(`Alla har pickat! GL HF :).`);
+        } catch (error) {
+          console.error("Failed to delete the message: ", error);
+        }
       });
     }
   }
