@@ -18,31 +18,31 @@ const client = new Client({
   ],
 });
 
-//function gif(meddelande, dravel, channel) {
-//  let filNamn = dravel.slice(1, 4);
-//  let jamesCameron =
-//    "https://cdn.discordapp.com/avatars/" +
-//    meddelande.author.id +
-//    "/" +
-//    meddelande.author.avatar;
-//  async function webbKrok() {
-//    try {
-//      var webhook = await channel.createWebhook(meddelande.member.displayName, {
-//        avatar: jamesCameron,
-//      });
-//
-//      await webhook.send({
-//        files: [filNamn + ".gif"],
-//        username: meddelande.member.displayName,
-//        avatarURL: jamesCameron,
-//      });
-//      webhook.delete();
-//    } catch (whoops) {
-//      console.error("Här sket det sig: ", whoops);
-//    }
-//  }
-//  webbKrok();
-//}
+function gif(meddelande, dravel, channel) {
+  let filNamn = dravel.slice(1, 4);
+  let jamesCameron =
+    "https://cdn.discordapp.com/avatars/" +
+    meddelande.author.id +
+    "/" +
+    meddelande.author.avatar;
+  async function webbKrok() {
+    try {
+      var webhook = await channel.createWebhook(meddelande.member.displayName, {
+        avatar: jamesCameron,
+      });
+
+      await webhook.send({
+        files: [filNamn + ".gif"],
+        username: meddelande.member.displayName,
+        avatarURL: jamesCameron,
+      });
+      webhook.delete();
+    } catch (whoops) {
+      console.error("Här sket det sig: ", whoops);
+    }
+  }
+  webbKrok();
+}
 
 // When the client is ready, run this code (only once)
 client.once("ready", () => {
