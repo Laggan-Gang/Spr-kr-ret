@@ -153,18 +153,8 @@ client.on("messageCreate", async (meddelande) => {
     if (meddelande.content.startsWith("yarn")) {
       const väntaNuHurMångaGubbarÄrDet = meddelande.content.split(" ");
       const gubbLängdsKollare = väntaNuHurMångaGubbarÄrDet.slice(1);
-      console.log(
-        "Vi kollar mängden gubbar, vi har " +
-          gubbLängdsKollare.length +
-          " gubbar"
-      );
       if (gubbLängdsKollare.length == 5) {
-        console.log("Det är rätt mängd gubbar");
-        let trådNamn = "";
-        for (gubbe in gubbLängdsKollare) {
-          console.log(gubbLängdsKollare[gubbe]);
-          trådNamn += `${kapitalisera(gubbLängdsKollare[gubbe])} `;
-        }
+        let trådNamn = `The ${meddelande.member.displayName} party`;
 
         let i = 0;
         let dummyArray = await maakepCall.maakepCall(meddelande);
@@ -212,7 +202,7 @@ client.on("messageCreate", async (meddelande) => {
 
         const collector = trådMeddelande.createReactionCollector({
           filter: (_, user) => !user.bot,
-          time: 300_000,
+          time: 360_000,
           max: 100,
         });
 
@@ -402,34 +392,41 @@ client.on("messageCreate", async (meddelande) => {
           console.log(
             "Vi har fått en react och ska nu utvärdera om den är vanlig, dublett eller fill"
           );
-          if (rollKoll(reaction.emoji.name) == "vanlig") {
-            console.log(
-              "Picken är vanlig, så vi kör standardPick. Efter det här utvärderar vi om vi behöver fler noobs eller inte."
-            );
-            //Loopen kommer *alltid* sluta efter en vanlig pick
-
-            //om det är en standard pick
-            await standardPick(reaction, aktivaNoobs);
-            //Avsluta det hela genom att kalla nya noobs, men bara om vi behöver fler noobs (dvs om modFull inte är full)
-            await finskaFighten(aktivaNoobs);
-          } else if (rollKoll(reaction.emoji.name) == "ogiltig") {
-            //Ogiltig roll (mobba!)
-            console.log("Någon har gjort funny business, så vi mobbar");
-            await dublettTillrättavisaren(aktivaNoobs, reaction, 293);
-          } else if (rollKoll(reaction.emoji.name) == "fill") {
-            let modRader = modMeddelande.split("\n");
-            if (modRader.length >= 5) {
+          let kolladReaktion = rollKoll(reaction.emoji.name);
+          switch (true) {
+            case kolladReaktion == "vanlig":
               console.log(
-                "Nu är modrader för lång, nu får man inte fill och nu kommer mobbningen"
+                "Picken är vanlig, så vi kör standardPick. Efter det här utvärderar vi om vi behöver fler noobs eller inte."
               );
-              await skojareTillrättavisaren(aktivaNoobs, 332);
-            } else {
-              //Vi fyller fillBoys med boys looking to fill. Sen hämtar vi nästa person som ska rakas
-              console.log("Någon har valt fill, så vi sätter hen i fillboys");
-              fillBoys.unshift(dummyArray[i]);
+              //Loopen kommer *alltid* sluta efter en vanlig pick
+
+              //om det är en standard pick
               await standardPick(reaction, aktivaNoobs);
-              await searchAndDestroy(aktivaNoobs, 403);
-            }
+              //Avsluta det hela genom att kalla nya noobs, men bara om vi behöver fler noobs (dvs om modFull inte är full)
+              await finskaFighten(aktivaNoobs);
+              break;
+
+            case kolladReaktion == "ogiltig":
+              //Ogiltig roll (mobba!)
+              console.log("Någon har gjort funny business, så vi mobbar");
+              await dublettTillrättavisaren(aktivaNoobs, reaction, 293);
+              break;
+
+            case kolladReaktion == "fill":
+              let modRader = modMeddelande.split("\n");
+              if (modRader.length >= 5) {
+                console.log(
+                  "Nu är modrader för lång, nu får man inte fill och nu kommer mobbningen"
+                );
+                await skojareTillrättavisaren(aktivaNoobs, 332);
+              } else {
+                //Vi fyller fillBoys med boys looking to fill. Sen hämtar vi nästa person som ska rakas
+                console.log("Någon har valt fill, så vi sätter hen i fillboys");
+                fillBoys.unshift(dummyArray[i]);
+                await standardPick(reaction, aktivaNoobs);
+                await searchAndDestroy(aktivaNoobs, 403);
+                break;
+              }
           }
         });
 
