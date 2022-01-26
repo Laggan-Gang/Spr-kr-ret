@@ -92,49 +92,49 @@ client.on("messageCreate", async (meddelande) => {
   if (!meddelande.author.bot) {
     const chanel = client.channels.cache.get(meddelande.channel.id);
     let dravel = meddelande.content.toLocaleLowerCase();
-    //
-    //const smörja = meddelande.content.toLocaleLowerCase().split(" ");
-    //const KOMMANDO = smörja[0];
-    //
-    //if (dravel.slice(1, 4) in gifSamling) {
-    //  gif(meddelande, dravel, chanel);
-    //  setTimeout(() => {
-    //    meddelande.delete().catch((error) => {
-    //      if (error.code !== 10008) {
-    //        console.error("Failed to delete the message: ", error);
-    //      }
-    //    });
-    //  }, 1000);
-    //} else if (dravel === "oh my, what are the codes for these gifs?") {
-    //  let gifManuel = new String();
-    //  for (gifBeskrivning in gifSamling) {
-    //    gifManuel +=
-    //      "\n" +
-    //      ":" +
-    //      gifBeskrivning +
-    //      ":" +
-    //      " = " +
-    //      gifSamling[gifBeskrivning];
-    //  }
-    //
-    //  meddelande.reply(gifManuel);
-    //} else if (KOMMANDO in goblinSamling) {
-    //  meddelande.reply("It's not time yet");
-    //  //// ASSUMING DIRECT CONTROL
-    //  //goblinPosting(
-    //  //  goblinSamling[KOMMANDO][0],
-    //  //  goblinSamling[KOMMANDO][1],
-    //  //  dravel.replace(KOMMANDO, ""),
-    //  //  chanel
-    //  //);
-    //  //setTimeout(() => {
-    //  //  meddelande.delete().catch((error) => {
-    //  //    if (error.code !== 10008) {
-    //  //      console.error("Failed to delete the message: ", error);
-    //  //    }
-    //  //  });
-    //  //}, 1000);
-    //}
+
+    const smörja = meddelande.content.toLocaleLowerCase().split(" ");
+    const KOMMANDO = smörja[0];
+
+    if (dravel.slice(1, 4) in gifSamling) {
+      gif(meddelande, dravel, chanel);
+      setTimeout(() => {
+        meddelande.delete().catch((error) => {
+          if (error.code !== 10008) {
+            console.error("Failed to delete the message: ", error);
+          }
+        });
+      }, 1000);
+    } else if (dravel === "oh my, what are the codes for these gifs?") {
+      let gifManuel = new String();
+      for (gifBeskrivning in gifSamling) {
+        gifManuel +=
+          "\n" +
+          ":" +
+          gifBeskrivning +
+          ":" +
+          " = " +
+          gifSamling[gifBeskrivning];
+      }
+
+      meddelande.reply(gifManuel);
+    } else if (KOMMANDO in goblinSamling) {
+      meddelande.reply("It's not time yet");
+      //// ASSUMING DIRECT CONTROL
+      //goblinPosting(
+      //  goblinSamling[KOMMANDO][0],
+      //  goblinSamling[KOMMANDO][1],
+      //  dravel.replace(KOMMANDO, ""),
+      //  chanel
+      //);
+      //setTimeout(() => {
+      //  meddelande.delete().catch((error) => {
+      //    if (error.code !== 10008) {
+      //      console.error("Failed to delete the message: ", error);
+      //    }
+      //  });
+      //}, 1000);
+    }
     if (meddelande.content == "tråd") {
       let i = 0;
       let dummyArray = [
