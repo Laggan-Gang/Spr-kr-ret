@@ -150,7 +150,7 @@ client.on("messageCreate", async (meddelande) => {
       //  });
       //}, 1000);
     }
-    if (meddelande.content.startsWith("tråd")) {
+    if (meddelande.content.startsWith("yarn")) {
       const väntaNuHurMångaGubbarÄrDet = meddelande.content.split(" ");
       const gubbLängdsKollare = väntaNuHurMångaGubbarÄrDet.slice(1);
       console.log(
@@ -160,15 +160,21 @@ client.on("messageCreate", async (meddelande) => {
       );
       if (gubbLängdsKollare.length == 5) {
         console.log("Det är rätt mängd gubbar");
+        let trådNamn = "";
+        for (gubbe in gubbLängdsKollare) {
+          console.log(gubbLängdsKollare[gubbe]);
+          trådNamn += `${kapitalisera(gubbLängdsKollare[gubbe])} `;
+        }
+
         let i = 0;
         let dummyArray = await maakepCall.maakepCall(meddelande);
         const thread = await meddelande.channel.threads.create({
-          name: "PISS",
+          name: trådNamn,
           autoArchiveDuration: 60,
           reason: "Needed a separate thread for PISS",
         });
         const tråden = meddelande.channel.threads.cache.find((x) => {
-          return x.name === "PISS";
+          return x.name === trådNamn;
         });
         if (tråden.joinable) await tråden.join();
 
