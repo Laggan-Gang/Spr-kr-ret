@@ -158,14 +158,14 @@ client.on("messageCreate", async (meddelande) => {
 
         let i = 0;
         let dummyArray = await maakepCall.maakepCall(meddelande);
-        const thread = await meddelande.channel.threads.create({
+        const tråden = await meddelande.channel.threads.create({
           name: trådNamn,
           autoArchiveDuration: 60,
           reason: "Needed a separate thread for PISS",
         });
-        const tråden = meddelande.channel.threads.cache.find((x) => {
-          return x.name === trådNamn;
-        });
+        //const tråden = meddelande.channel.threads.cache.find((x) => {
+        //  return x.name === trådNamn;
+        //});
         if (tråden.joinable) await tråden.join();
 
         let trådMeddelande = await tråden.send(
@@ -195,6 +195,7 @@ client.on("messageCreate", async (meddelande) => {
           }
           return noobenIFråga;
         }
+        var pingMeddelande;
         searchAndDestroy(dummyArray, 206);
         //let pingMeddelande = await tråden.send(
         //  `${vadKallasDu()}, your turn to pick. Please react with your role of choice.`
@@ -398,8 +399,6 @@ client.on("messageCreate", async (meddelande) => {
               console.log(
                 "Picken är vanlig, så vi kör standardPick. Efter det här utvärderar vi om vi behöver fler noobs eller inte."
               );
-              //Loopen kommer *alltid* sluta efter en vanlig pick
-
               //om det är en standard pick
               await standardPick(reaction, aktivaNoobs);
               //Avsluta det hela genom att kalla nya noobs, men bara om vi behöver fler noobs (dvs om modFull inte är full)
@@ -431,7 +430,16 @@ client.on("messageCreate", async (meddelande) => {
         });
 
         collector.on("end", (collected) => {
+          //Stäng av klockan och plocka bort pingmeddelande om det finns
           snooze(äggKlockan);
+          if (pingMeddelande) {
+            try {
+              pingMeddelande.delete();
+            } catch (error) {
+              console.error(error);
+            }
+          }
+          //Formatera om översta posten
           let modRader = modMeddelande.split("\n");
           let finsktMeddelande = "";
           for (rad of modRader) {
@@ -452,14 +460,9 @@ client.on("messageCreate", async (meddelande) => {
           }
           console.log(finsktMeddelande);
           try {
-            pingMeddelande.delete();
-          } catch (error) {
-            console.error("Failed to delete the message: ", error);
-          }
-          try {
             pingMeddelande = tråden.send(`Alla har pickat! GL HF :).`);
           } catch (error) {
-            console.error("Failed to delete the message: ", error);
+            console.error("Failed to send the message: ", error);
           }
         });
       } else {
