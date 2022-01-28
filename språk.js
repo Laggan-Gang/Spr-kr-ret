@@ -213,7 +213,7 @@ client.on("messageCreate", async (meddelande) => {
           //kolla om vår noob har en preferens, har den det så nice
           if (noobs[i].preferences) {
             let preferenser = noobs[i].preferences;
-            let resultat = "5️⃣";
+            let resultat = "fill";
             for (const preferens of preferenser) {
               if (rollKoll(emojiSiffror[preferens - 1]) == "vanlig") {
                 //Vi använder roll-koll för att hitta vad som räknas som en "vanlig" pick och sen tjongar vi iväg den. Det är funky när vi översätter preferens till emojiSiffror eftersom
@@ -238,10 +238,22 @@ client.on("messageCreate", async (meddelande) => {
         }
 
         async function autoPicker(reaktion, noobs) {
-          console.log("Nu kör vi automatiska versionen! Först uppdatera pick");
-          await standardPick(reaktion, noobs);
-          console.log("Sen hämta nästa noob!");
-          await finskaFighten(noobs);
+          console.log(
+            "Nu kör vi automatiska versionen! Först kollar vi om vi fått fill"
+          );
+          if ((reaktion = "fill")) {
+            fillBoysNeedFilling(noobs, reaktion);
+          } else {
+            console.log(
+              "Det är inte fill, så auto picker låter " +
+                noobs[i] +
+                " picka " +
+                reaktion
+            );
+            await standardPick(reaktion, noobs);
+            console.log("Sen hämta nästa noob!");
+            await finskaFighten(noobs);
+          }
         }
 
         function snooze(timer) {
@@ -302,6 +314,7 @@ client.on("messageCreate", async (meddelande) => {
           }
           if (rollKoll(riktigReact) == "vanlig") {
             pickladeRoller.push(riktigReact);
+            console.log("Picklade roller just nu är: ", pickladeRoller);
           }
           modMeddelande += `${kapitalisera(
             noobs[i].namn
@@ -391,6 +404,22 @@ client.on("messageCreate", async (meddelande) => {
           }
         }
 
+        async function fillBoysNeedFilling(noobs, reaktion) {
+          let modRader = modMeddelande.split("\n");
+          if (modRader.length >= 5) {
+            console.log(
+              "Nu är modrader för lång, nu får man inte fill och nu kommer mobbningen"
+            );
+            await skojareTillrättavisaren(noobs);
+          } else {
+            //Vi fyller fillBoys med boys looking to fill. Sen hämtar vi nästa person som ska rakas
+            console.log("Någon har valt fill, så vi sätter hen i fillboys");
+            fillBoys.unshift(dummyArray[i]);
+            await standardPick(reaktion, noobs);
+            await searchAndDestroy(noobs, 419);
+          }
+        }
+
         collector.on("collect", async (reaction, user) => {
           snooze(äggKlockan);
           console.log(
@@ -415,20 +444,8 @@ client.on("messageCreate", async (meddelande) => {
               break;
 
             case kolladReaktion == "fill":
-              let modRader = modMeddelande.split("\n");
-              if (modRader.length >= 5) {
-                console.log(
-                  "Nu är modrader för lång, nu får man inte fill och nu kommer mobbningen"
-                );
-                await skojareTillrättavisaren(aktivaNoobs);
-              } else {
-                //Vi fyller fillBoys med boys looking to fill. Sen hämtar vi nästa person som ska rakas
-                console.log("Någon har valt fill, så vi sätter hen i fillboys");
-                fillBoys.unshift(dummyArray[i]);
-                await standardPick(reaction, aktivaNoobs);
-                await searchAndDestroy(aktivaNoobs, 403);
-                break;
-              }
+              fillBoysNeedFilling(aktivaNoobs, reaction);
+              break;
           }
         });
 
