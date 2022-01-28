@@ -190,13 +190,15 @@ client.on("messageCreate", async (meddelande) => {
           let noobenIFråga = "";
           if (aktivaNoobs[i].id) {
             noobenIFråga = `${aktivaNoobs[i].id}`;
+            console.log("Nooben i fråga har ett ID ", noobenIFråga);
           } else {
             noobenIFråga = kapitalisera(aktivaNoobs[i].namn);
+            console.log("Nooben har inte ett namn ", noobenIFråga);
           }
           return noobenIFråga;
         }
         var pingMeddelande;
-        searchAndDestroy(dummyArray, 206);
+        searchAndDestroy(dummyArray, 199);
         //let pingMeddelande = await tråden.send(
         //  `${vadKallasDu()}, your turn to pick. Please react with your role of choice.`
         //);
@@ -260,7 +262,10 @@ client.on("messageCreate", async (meddelande) => {
           try {
             let föredragen = hittaOchKollaPreferens(noobs);
             pingMeddelande = await tråden.send(
-              `${vadKallasDu()}, your turn to pick. If you do not pick within 60 seconds you will be assigned ${föredragen}, ${row}`
+              `${vadKallasDu()}, your turn to pick. If you do not pick within 60 seconds you will be assigned ${föredragen}`
+            );
+            console.log(
+              `${vadKallasDu()} kommer asignas ${föredragen} om 60 sekunder, ${row}`
             );
             //Vi sätter en äggklocka, men ser först till att vi avslutar den tidigare (om det finns någon)
             snooze(äggKlockan);
@@ -289,10 +294,10 @@ client.on("messageCreate", async (meddelande) => {
           let riktigReact;
           console.log("Kolla om vår reaktion har ett namn ");
           if (reaktion.emoji) {
-            console.log("'Den har ett namn!");
+            console.log("'Den har ett namn!", reaktion.emoji.name);
             riktigReact = reaktion.emoji.name;
           } else {
-            console.log("Den har inte ett namn!");
+            console.log("Den har inte ett namn!", reaktion);
             riktigReact = reaktion;
           }
           if (rollKoll(riktigReact) == "vanlig") {
@@ -316,12 +321,11 @@ client.on("messageCreate", async (meddelande) => {
             return false;
           }
         }
-        async function dublettTillrättavisaren(noobs, reaction, row) {
+        async function dublettTillrättavisaren(noobs, reaction) {
           let trängningsMeddelande = await tråden.send(
             `${kapitalisera(noobs[i].namn)} ${
               reaction.emoji.name
-            } has already been picked, please pick another role!`,
-            row
+            } has already been picked, please pick another role!`
           );
           setTimeout(() => {
             trängningsMeddelande.delete();
@@ -332,13 +336,12 @@ client.on("messageCreate", async (meddelande) => {
           return string.charAt(0).toUpperCase() + string.slice(1);
         }
 
-        async function skojareTillrättavisaren(noobs, row) {
+        async function skojareTillrättavisaren(noobs) {
           try {
             let skojareMeddelande = await tråden.send(
               `${kapitalisera(
                 noobs[i].namn
-              )} du kan inte välja fill när du är last pick >:(`,
-              row
+              )} du kan inte välja fill när du är last pick >:(`
             );
             setTimeout(() => {
               skojareMeddelande.delete();
@@ -408,7 +411,7 @@ client.on("messageCreate", async (meddelande) => {
             case kolladReaktion == "ogiltig":
               //Ogiltig roll (mobba!)
               console.log("Någon har gjort funny business, så vi mobbar");
-              await dublettTillrättavisaren(aktivaNoobs, reaction, 293);
+              await dublettTillrättavisaren(aktivaNoobs, reaction);
               break;
 
             case kolladReaktion == "fill":
@@ -417,7 +420,7 @@ client.on("messageCreate", async (meddelande) => {
                 console.log(
                   "Nu är modrader för lång, nu får man inte fill och nu kommer mobbningen"
                 );
-                await skojareTillrättavisaren(aktivaNoobs, 332);
+                await skojareTillrättavisaren(aktivaNoobs);
               } else {
                 //Vi fyller fillBoys med boys looking to fill. Sen hämtar vi nästa person som ska rakas
                 console.log("Någon har valt fill, så vi sätter hen i fillboys");
@@ -442,6 +445,12 @@ client.on("messageCreate", async (meddelande) => {
           //Formatera om översta posten
           let modRader = modMeddelande.split("\n");
           let finsktMeddelande = "";
+          function aOchO(sträng) {
+            console.log(sträng);
+            let nySträng = sträng.replace("!", "");
+            let aOchO = nySträng.split(" ");
+            return `${aOchO[0]} ${aOchO.pop()}`;
+          }
           for (rad of modRader) {
             if (
               rad.includes(emojiSiffror[0]) ||
@@ -450,17 +459,15 @@ client.on("messageCreate", async (meddelande) => {
               rad.includes(emojiSiffror[3]) ||
               rad.includes(emojiSiffror[4])
             ) {
-              finsktMeddelande += `${rad}\n`;
+              finsktMeddelande += `${aOchO(rad)} `;
+              console.log("Den här raden tjongar vi in i aOchO ", rad);
             }
-          }
-          try {
-            trådMeddelande.edit(finsktMeddelande);
-          } catch (error) {
-            console.error(error);
           }
           console.log(finsktMeddelande);
           try {
-            pingMeddelande = tråden.send(`Alla har pickat! GL HF :).`);
+            pingMeddelande = tråden.send(
+              `Picking is complete!\n${finsktMeddelande} Gl hf :) `
+            );
           } catch (error) {
             console.error("Failed to send the message: ", error);
           }
