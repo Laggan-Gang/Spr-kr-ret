@@ -185,29 +185,39 @@ client.on("messageCreate", async (meddelande) => {
         let fillBoys = [];
         let aktivaNoobs = dummyArray;
         var äggKlockan;
-
-        function vadKallasDu() {
-          let noobenIFråga = "";
-          if (aktivaNoobs[i].id) {
-            noobenIFråga = `${aktivaNoobs[i].id}`;
-            console.log("Nooben i fråga har ett ID ", noobenIFråga);
-          } else {
-            noobenIFråga = kapitalisera(aktivaNoobs[i].namn);
-            console.log("Nooben har inte ett namn ", noobenIFråga);
-          }
-          return noobenIFråga;
-        }
         var pingMeddelande;
+
+        pingMeddelande = await tråden.send(ROLLCALL(dummyArray));
+
         searchAndDestroy(dummyArray, 199);
-        //let pingMeddelande = await tråden.send(
-        //  `${vadKallasDu()}, your turn to pick. Please react with your role of choice.`
-        //);
 
         const collector = trådMeddelande.createReactionCollector({
           filter: (_, user) => !user.bot,
           time: 360_000,
           max: 100,
         });
+
+        function ROLLCALL(noobs) {
+          let whoYouGonnaCall = [];
+          for (const noob of noobs) {
+            whoYouGonnaCall.push(vadKallasDu(noob));
+          }
+          whoYouGonnaCall.join(" ");
+          let returMeddelande = `${whoYouGonnaCall}, get ready to pick!`;
+          return returMeddelande;
+        }
+
+        function vadKallasDu(noob) {
+          if (noob.id) {
+            console.log("Nooben i fråga har ett ID ", noob.id);
+            return noob.id;
+          } else {
+            console.log("Nooben har inte ett id " + noob.namn);
+            console.log(noob);
+            noobenIFråga = kapitalisera(noob.namn);
+            return kapitalisera(noob.namn);
+          }
+        }
 
         function hittaOchKollaPreferens(noobs) {
           //kolla om vår noob har en preferens, har den det så nice
@@ -241,7 +251,8 @@ client.on("messageCreate", async (meddelande) => {
           console.log(
             "Nu kör vi automatiska versionen! Först kollar vi om vi fått fill"
           );
-          if ((reaktion = "fill")) {
+          if (reaktion == "fill") {
+            console.log(reaktion + "är fill! Vi kör fillBoys");
             fillBoysNeedFilling(noobs, reaktion);
           } else {
             console.log(
@@ -274,10 +285,14 @@ client.on("messageCreate", async (meddelande) => {
           try {
             let föredragen = hittaOchKollaPreferens(noobs);
             pingMeddelande = await tråden.send(
-              `${vadKallasDu()}, your turn to pick. If you do not pick within 60 seconds you will be assigned ${föredragen}`
+              `${vadKallasDu(
+                aktivaNoobs[i]
+              )}, your turn to pick. If you do not pick within 60 seconds you will be assigned ${föredragen}`
             );
             console.log(
-              `${vadKallasDu()} kommer asignas ${föredragen} om 60 sekunder, ${row}`
+              `${vadKallasDu(
+                aktivaNoobs[i]
+              )} kommer asignas ${föredragen} om 60 sekunder, ${row}`
             );
             //Vi sätter en äggklocka, men ser först till att vi avslutar den tidigare (om det finns någon)
             snooze(äggKlockan);
@@ -421,7 +436,6 @@ client.on("messageCreate", async (meddelande) => {
         }
 
         collector.on("collect", async (reaction, user) => {
-          snooze(äggKlockan);
           console.log(
             "Vi har fått en react och ska nu utvärdera om den är vanlig, dublett eller fill"
           );
@@ -450,6 +464,7 @@ client.on("messageCreate", async (meddelande) => {
         });
 
         collector.on("end", (collected) => {
+          console.log("NU ÄR VI FÖRMODLIGEN KLARA");
           //Stäng av klockan och plocka bort pingmeddelande om det finns
           snooze(äggKlockan);
           if (pingMeddelande) {
