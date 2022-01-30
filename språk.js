@@ -99,6 +99,11 @@ function goblinPosting(bild, namn, ord, kanal) {
 let goblinSamling = {
   "!gob": ["kom ihåg att lägga till url här :)", "Secret ;)"],
 };
+
+
+let gobboGex = new RegExp(`^:(${Object.keys(gifSamling).join('|')}):`)
+
+
 client.on("messageCreate", async (meddelande) => {
   //=> är en funktion
   if (!meddelande.author.bot) {
@@ -108,7 +113,7 @@ client.on("messageCreate", async (meddelande) => {
     const smörja = meddelande.content.toLocaleLowerCase().split(" ");
     const KOMMANDO = smörja[0];
 
-    if (dravel.slice(1, 4) in gifSamling) {
+    if (dravel.match(gobboGex)) {
       gif(meddelande, dravel, chanel);
       setTimeout(() => {
         meddelande.delete().catch((error) => {
