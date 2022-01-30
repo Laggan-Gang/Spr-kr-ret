@@ -430,7 +430,7 @@ client.on("messageCreate", async (meddelande) => {
             //Vi fyller fillBoys med boys looking to fill. Sen hämtar vi nästa person som ska rakas
             console.log("Någon har valt fill, så vi sätter hen i fillboys");
             fillBoys.unshift(dummyArray[i]);
-            await standardPick(reaktion, noobs);
+            await standardPick("<:fill:935684531023925299>", noobs);
             await searchAndDestroy(noobs, 419);
           }
         }
