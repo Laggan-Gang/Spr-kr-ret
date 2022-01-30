@@ -50,6 +50,7 @@ client.once("ready", () => {
 
 var gifSamling = {
   aaa: "A spooky skeleton",
+  aah: "Maakep does this at work",
   asg: "Big bro rolls around",
   cdd: "Cool dog checks it out",
   cia: "BaaaaaaanEE?",
