@@ -17,19 +17,6 @@ const client = new Client({
   ],
 });
 
-//BELOW THIS LINE IS AUTHENTIC MAAKEP CODE, DO NOT MAKE ANY CHANGES AS IT IS THE ENGINE WHICH DRIVES THE ENTIRE PROJECT\\
-
-function shuffleArray(arr) {
-  const array = [...arr];
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
-//ABOVE THIS LINE IS AUTHENTIC MAAKEP CODE, DO NOT MAKE ANY CHANGES AS IT IS THE ENGINE WHICH DRIVES THE ENTIRE PROJECT\\
-
 function gif(meddelande, dravel, channel) {
   let filNamn = dravel.slice(1, 4);
   let jamesCameron =
@@ -108,7 +95,12 @@ client.on("messageCreate", async (meddelande) => {
     const smörja = meddelande.content.toLocaleLowerCase().split(" ");
     const KOMMANDO = smörja[0];
 
-    if (dravel.slice(1, 4) in gifSamling) {
+    if (
+      dravel.length == 5 &&
+      dravel.startsWith(":") &&
+      dravel.endsWith(":") &&
+      dravel.slice(1, 4) in gifSamling
+    ) {
       gif(meddelande, dravel, chanel);
       setTimeout(() => {
         meddelande.delete().catch((error) => {
