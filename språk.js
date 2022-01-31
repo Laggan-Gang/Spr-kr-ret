@@ -97,12 +97,16 @@ client.on("messageCreate", async (meddelande) => {
     const smörja = meddelande.content.toLocaleLowerCase().split(" ");
     const KOMMANDO = smörja[0];
     if (
-      dravel.length <
-        3 +
-          Object.keys(gifSamling)
-            .map((i) => i.length)
-            .map(Math.max, 0) &&
-      dravel.match(gobboGex)
+      //  dravel.length <
+      //    3 +
+      //      Object.keys(gifSamling)
+      //        .map((i) => i.length)
+      //        .map(Math.max, 0) &&
+      //  dravel.match(gobboGex)
+      dravel.length == 5 &&
+      dravel.startsWith(":") &&
+      dravel.endsWith(":") &&
+      dravel.slice(1, 4) in gifSamling
     ) {
       gif(meddelande, dravel, chanel);
       setTimeout(() => {
