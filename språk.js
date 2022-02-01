@@ -66,6 +66,9 @@ var gifSamling = {
   sry: "Oh shit",
 };
 
+let goblinSamling = {
+  "!gob": ["kom ihåg att lägga till url här :)", "Secret ;)"],
+};
 function goblinPosting(bild, namn, ord, kanal) {
   async function webbKrok() {
     try {
@@ -84,9 +87,6 @@ function goblinPosting(bild, namn, ord, kanal) {
   webbKrok();
 }
 
-let goblinSamling = {
-  "!gob": ["kom ihåg att lägga till url här :)", "Secret ;)"],
-};
 let gobboGex = new RegExp(`^:(${Object.keys(gifSamling).join("|")}):`);
 client.on("messageCreate", async (meddelande) => {
   //=> är en funktion
